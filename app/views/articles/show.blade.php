@@ -1,7 +1,7 @@
 @extends("layouts.application")
 
 @section("content")
-  {{link_to('export-excel/'.$article->id, 'export', array('class' => 'btn btn-success'))}}
+  {{link_to('export-excel/'.$article->id, 'Export Excel', array('class' => 'btn btn-success'))}}
   
   @if (Session::has('notice'))
     <div class="alert alert-info">{{Session::get('notice')}}</div>

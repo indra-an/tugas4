@@ -15,6 +15,6 @@
 Route::get('/', array('as' => '/', 'uses' => 'ArticleController@index'));
 Route::get('/export-excel/{article_id}', array('as' => 'export-excel', 'uses' => 'ArticleController@export'));
 Route::get('/import', array('as' => 'import','uses' =>'ArticleController@form_import'));
-Route::get('/import-excel', array('as' => 'import-excel','uses' =>'ArticleController@import'));
+Route::post('/import-excel', array('as' => 'import-excel','uses' =>'ArticleController@import'));
 Route::resource('articles', 'ArticleController');
 Route::resource('comments', 'CommentController');

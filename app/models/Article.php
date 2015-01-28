@@ -12,12 +12,25 @@ class Article extends \Eloquent {
 			);
 	}
 	public static function validImport(){
-		return array(
-			'file'		=> 'mimes:jpeg,bmp,png'
-			);
+		Validator::extend('req_excel', function($attribute, $value, $parameters)
+		{
+    		  $valid_mime_type = array('application/vnd.ms-office', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      		  $mime = $value->getMimeType();
+      	  
+      	  return in_array($mime, $valid_mime_type);
+        });
+    	  return array(
+    	  	'file' => 'req_excel'
+    	  );
 	}
+
 
 	public function comments() {
     	return $this->hasMany('Comment', 'article_id');
+ 	}
+
+ 	public function delete() {
+ 		$this->comments()->delete();
+ 		return parent::delete();
  	}
 }

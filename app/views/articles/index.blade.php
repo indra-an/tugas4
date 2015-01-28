@@ -9,6 +9,14 @@
   @if (Session::has('notice'))
     <div class="alert alert-info">{{Session::get('notice')}}</div>
   @endif
+  
+  @if (Session::has('error')) 
+    <div class="alert alert-danger">{{Session::get('error')}} {{$errors->first('title')}} 
+        {{$errors->first('content')}} 
+        {{$errors->first('author')}}
+        </div>       
+  @endif
+        
 
   @foreach ($articles as $article)
     <div>

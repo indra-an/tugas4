@@ -9,5 +9,9 @@ class Comment extends \Eloquent {
 			'content'	=> 'required'
 			);
 	}
+	
+	public function articles() {
+    	return $this->belongsTo('article', 'article_id');
+  	}
 
 }

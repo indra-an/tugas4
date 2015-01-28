@@ -117,6 +117,7 @@ class ArticleController extends \BaseController {
 	public function destroy($id)
 	{
 		$articles = Article::find($id);
+		$articles->comments()->delete();
 		$articles->delete();
 
 		Session::flash('notice','Article success delete');
@@ -154,50 +155,54 @@ class ArticleController extends \BaseController {
 	}
 
 	public function import(){
-		$validate = Validator::make(Input::all(), Article::validImport());
-   	    
+		
+		$file_name = Input::file('file')->getClientOriginalName();
+		$path_save_image = public_path().'/upload_excel';
+		$message = array(
+				'req_excel' => 'File must MS excel'
+			);
+		$validate = Validator::make(Input::all(), Article::validImport(),$message);
+	
    	    if($validate->fails()) {
       		return Redirect::to('import')
         		->withErrors($validate);
    		}else{
-		
 		if (Input::hasFile('file'))
 		{
 		
-		$file_name = Input::file('file')->getClientOriginalName();
-		$path_save_image = public_path().'/upload_excel';
-    	 
     	  if(!File::exists($path_save_image)) {
     	    File::makeDirectory($path_save_image, $mode = 0777, true, true);
   		  }
+  		  Input::file('file')->move($path_save_image, $file_name);
 
-		Excel::load($path_save_image.'/'.$file_name, function($reader) {
+	
+		$excel = Excel::selectSheetsByIndex(0)->load($path_save_image.'/'.$file_name, function($reader){})->get()->toArray();
+	
+			foreach($excel as $ex){
 
-   				$reader->first();
-   			
-				// Loop through all sheets
-				$reader->each(function($sheet) {
-
-    			$sheet->each(function($row) {
-    				$data = array(
-    						'title'		=> $row->title,
-    						'content'	=> $row->content,
-    						'author'	=> $row->author,
-    					);
-    				$validate = Validator::make($data, Article::valid($id));
+				$data['title']		= $ex["title"];
+    			$data['content']	= $ex["content"];
+    			$data['author']		= $ex["author"];
+				$validate = Validator::make($data, Article::valid());
+					
 					if($validate->fails()){
+
+						File::delete($path_save_image.'/'.$file_name);
 						Session::flash('error','Import Data Failed');
-						return Redirect::to('/');	
+						return Redirect::to('/')->withErrors($validate);	
 					}else{			
 						$articles = Article::create($data);
+						Session::flash('notice','Import Data Success');
+						return Redirect::to('/');	
 					}
-    				
-    			});
+			}
 
-			});
-		});
-		
+		}else{
+			File::delete($path_save_image.'/'.$file_name);
+			Session::flash('error','Import Data Failed');
+			return Redirect::to('/');		
 		}
+
 		}
 	}
 
